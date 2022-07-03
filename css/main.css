@@ -1,0 +1,43 @@
+html,
+* {
+    font-family: helvetica;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#score-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.space-between {
+    margin: 20px;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    border: 1px solid black;
+    background-color: lightgray;
+}
+
+
+#board > div {
+    width: 5vh;
+    height: 5vh;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
