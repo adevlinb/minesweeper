@@ -12,7 +12,7 @@ body {
     align-items: center;
 }
 
-#score-box {
+.score-box {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -23,6 +23,7 @@ body {
 }
 
 #board {
+    margin-top: 20px;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     border: 1px solid black;
@@ -30,14 +31,58 @@ body {
 }
 
 
-#board > div {
-    width: 5vh;
-    height: 5vh;
-    border: 1px solid black;
+.null-setup {
+    width: 7vh;
+    height: 7vh;
+    border: 2px solid black;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: grey;
+
 }
 
+#board > div:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+}
+
+.testing {
+    width: 7vh;
+    height: 7vh;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+}
+
+#set-flag, #set-click {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+}
+
+#set-flag > img {
+    width: 30px;
+}
+
+#set-click > img {
+    width: 30px;
+}
+
+.flag {
+    width: 7vh;
+    height: 7vh;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: grey;
+    background-image: url("../imgs/flag.png");
+}
 
 
