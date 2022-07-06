@@ -6,14 +6,14 @@
 let gameStatus; //null to start "w" for all bombs / no more moves "L" for clicked on mine
 let setFlag; // flag setting selected to drop a flag on selected spot
 let setClick; // regular cursor selected for regular click functions
-let gamesWon;
-let gamesLost;
 let board; 
 let numOfMines;
 let currentPosition;
 let bombLookup;
 let flagCount;
 let bombsToFind;
+let gamesWon = 0;
+let gamesLost = 0;
 
 
 
@@ -42,21 +42,13 @@ document.getElementById("set-click")
         setClick = true; 
     });
 
-boardEl.addEventListener("click", updateGuesses)
-boardEl.addEventListener("dblclick", update)
-function update(evt) {
-    console.log("dbl")
-}
-
-
+boardEl.addEventListener("click", handleGuesses)
 
 
 /*----- functions -----*/
 init ();
 
 function init() {
-    gamesWon = 0;
-    gamesLost = 0;
     numOfMines = 15;
     bombsToFind = 15;
     flagsPlaced = 0;
@@ -110,6 +102,7 @@ function setBoard() {
         bombLookup[count] = [rndIdxI, rndIdxJ];
         count ++;
     }
+    console.log(bombLookup, "lookup")
 }
 
 function getRandomIdx() {
@@ -117,7 +110,7 @@ function getRandomIdx() {
 }
 
 function setNumsAroundBombs(idxI, idxJ) {
-    console.log("im here setting nums", idxI, idxJ);
+
     // guard to stay in bounds
     if (idxI < 0 || idxI > 9 || idxJ < 0 || idxJ > 9 || board[idxI][idxJ].mine === true) return;
     board[idxI][idxJ].number = board[idxI][idxJ].number + 1;
@@ -130,7 +123,7 @@ function setScores() {
     flagNumEl.textContent = `Flags: ${flagsPlaced}`;
 }
 
-function updateGuesses(evt) {
+function handleGuesses(evt) {
     console.log(evt, "evt", window);
     let i = evt.target.id[1];
     let j = evt.target.id[3];
@@ -138,32 +131,31 @@ function updateGuesses(evt) {
     if (gameStatus === "L" ||
        (board[i][j].flag === true && setFlag !== true)) return;
 
+    console.log(gameStatus, "L")
     if (setFlag) {
         // setFlag = true... if this position has a flag -> remove it; if it doesn't -> add it
         if(board[i][j].flag === true) {
             board[i][j].flag = false
-            console.log(board[i][j], "hello-flag")
             --flagsPlaced;
             ++bombsToFind;
         } else {
             board[i][j].flag = true;
-            console.log(board[i][j], "hello-flag")
             ++flagsPlaced;
             --bombsToFind;
         }
         
-    } else if (setClick && board[i][j].number === null) {
-        convertNulls(i, j);
+    } 
 
-    }
     console.log(board);
     setScores();
-    gameStatus = checkGameSatus();
+    gameStatus = checkGameStatus(i, j);
     render()
 }
 
-function checkGameSatus() {
-    
+function checkGameStatus(i, j) {
+    if (board[i][j].number === -1 && setFlag !== true) return "L" 
+    return null;
+    //check if all bombs have flags &&...
 
 }
 
