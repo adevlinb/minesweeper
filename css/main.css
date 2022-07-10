@@ -13,6 +13,7 @@ body {
 }
 
 .score-box {
+    
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -24,10 +25,12 @@ body {
 
 #board {
     margin-top: 20px;
+    margin-bottom: 100px;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     border: 1px solid black;
     background-color: lightgray;
+
 }
 
 

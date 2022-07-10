@@ -34,7 +34,6 @@ document.getElementById("set-flag")
     .addEventListener("click", function(evt) {
         setFlag = true;
         setClick = false; 
-        console.log("flag", setFlag, setClick);
     });
 document.getElementById("set-click")
     .addEventListener("click", function(evt) {
@@ -53,6 +52,8 @@ function init() {
     bombsToFind = 15;
     flagsPlaced = 0;
     bombLookup = {};
+    gameStatus = null;
+    setClick = true;
     board = [
         [null, null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null, null],
@@ -73,7 +74,6 @@ function init() {
         return newArr;
     })
 
-    console.log(board, "board");
     setBoard();
     setScores();
     render();
@@ -102,7 +102,6 @@ function setBoard() {
         bombLookup[count] = [rndIdxI, rndIdxJ];
         count ++;
     }
-    console.log(bombLookup, "lookup")
 }
 
 function getRandomIdx() {
@@ -124,14 +123,12 @@ function setScores() {
 }
 
 function handleGuesses(evt) {
-    console.log(evt, "evt", window);
-    let i = evt.target.id[1];
-    let j = evt.target.id[3];
+    let i = parseInt(evt.target.id[1]);
+    let j = parseInt(evt.target.id[3]);
     //guards
     if (gameStatus === "L" ||
        (board[i][j].flag === true && setFlag !== true)) return;
 
-    console.log(gameStatus, "L")
     if (setFlag) {
         // setFlag = true... if this position has a flag -> remove it; if it doesn't -> add it
         if(board[i][j].flag === true) {
@@ -143,17 +140,23 @@ function handleGuesses(evt) {
             ++flagsPlaced;
             --bombsToFind;
         }
-        
-    } 
-
-    console.log(board);
+    }
+    
+    if (setClick) {
+        console.log("im here")
+        if (board[i][j].number === 0)
+        setFloodZerosToNull(i, j)
+    }
+    console.log(board, "im here")
     setScores();
     gameStatus = checkGameStatus(i, j);
     render()
 }
 
 function checkGameStatus(i, j) {
-    if (board[i][j].number === -1 && setFlag !== true) return "L" 
+    if (board[i][j].number === -1 && setFlag !== true) {
+        return "L"
+    } 
     return null;
     //check if all bombs have flags &&...
 
@@ -186,4 +189,20 @@ function render() {
         })
     })
 
+}
+
+function setFloodZerosToNull(i, j) {
+    console.log("testing", i, j)
+    if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
+    if (board[i][j].number === 0) board[i][j].number = null;
+    console.log(board, "board")
+    setFloodZerosToNull(i - 1, j - 1);
+    setFloodZerosToNull(i - 1, j);
+    setFloodZerosToNull(i - 1, j + 1);
+    setFloodZerosToNull(i, j - 1);
+    setFloodZerosToNull(i, j + 1);
+    setFloodZerosToNull(i + 1, j - 1);
+    setFloodZerosToNull(i + 1, j);
+    setFloodZerosToNull(i + 1, j + 1);
+    console.log(board)
 }
