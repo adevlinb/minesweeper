@@ -69,7 +69,7 @@ function init() {
     ]
     board = board.map(function(array) {
         let newArr = array.map(function(ele) {
-            let newEl = {mine: false, flag: false, empty: false, number: 0};
+            let newEl = {mine: false, flag: false, empty: false, number: 0, visible: false};
             return newEl;
         });
         return newArr;
@@ -128,7 +128,8 @@ function handleGuesses(evt) {
     let j = parseInt(evt.target.id[3]);
     //guards
     if (gameStatus === "L" ||
-       (board[i][j].flag === true && setFlag !== true)) return;
+       (board[i][j].flag === true && setFlag !== true) ||
+       board[i][j].number === null) return;
 
     if (setFlag) {
         // setFlag = true... if this position has a flag -> remove it; if it doesn't -> add it
@@ -158,9 +159,15 @@ function checkGameStatus(i, j) {
     if (board[i][j].number === -1 && setFlag !== true) {
         return "L"
     } 
-    return null;
     //check if all bombs have flags &&...
-
+    for (let array in bombLookup) {
+        let i = bombLookup[array][0];
+        let j = bombLookup[array][1];
+        
+    
+    }
+    
+    return null;
 }
 
 function render() {
@@ -187,7 +194,7 @@ function render() {
             if(square.number === null) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag")
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup")
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
+                // document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty") 
                 
             }
@@ -201,6 +208,7 @@ function setFloodZerosToNull(i, j) {
 
     if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
     if (board[i][j].number === 0) board[i][j].number = null;
+    
     setFloodZerosToNull(i - 1, j);
     setFloodZerosToNull(i, j - 1);
     setFloodZerosToNull(i, j + 1);
