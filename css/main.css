@@ -88,4 +88,13 @@ body {
     /* background-image: url("../imgs/flag.png"); */
 }
 
+.empty {
+    width: 7vh;
+    height: 7vh;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
 

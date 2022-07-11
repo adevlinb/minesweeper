@@ -54,6 +54,7 @@ function init() {
     bombLookup = {};
     gameStatus = null;
     setClick = true;
+    setFlag = false;
     board = [
         [null, null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null, null],
@@ -181,8 +182,13 @@ function render() {
             }
             if(square.flag === false) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag")
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup")
-
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup") 
+            }
+            if(square.number === null) {
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag")
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup")
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty") 
                 
             }
             
@@ -192,17 +198,12 @@ function render() {
 }
 
 function setFloodZerosToNull(i, j) {
-    console.log("testing", i, j)
+
     if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
     if (board[i][j].number === 0) board[i][j].number = null;
-    console.log(board, "board")
-    setFloodZerosToNull(i - 1, j - 1);
     setFloodZerosToNull(i - 1, j);
-    setFloodZerosToNull(i - 1, j + 1);
     setFloodZerosToNull(i, j - 1);
     setFloodZerosToNull(i, j + 1);
-    setFloodZerosToNull(i + 1, j - 1);
     setFloodZerosToNull(i + 1, j);
-    setFloodZerosToNull(i + 1, j + 1);
-    console.log(board)
+
 }
