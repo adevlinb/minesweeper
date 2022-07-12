@@ -145,9 +145,11 @@ function handleGuesses(evt) {
     }
     
     if (setClick) {
-        console.log("im here")
-        if (board[i][j].number === 0)
-        setFloodZerosToNull(i, j)
+        if (board[i][j].number === 0) {
+            setFloodZerosToNull(i, j)
+        } else if (board[i][j] !== 0) {
+            board[i][j].visible = true;
+        }
     }
     console.log(board, "im here")
     setScores();
@@ -173,30 +175,33 @@ function checkGameStatus(i, j) {
 function render() {
 
     board.forEach(function(row, idxI) {
-        row.forEach(function(square, idxJ){
-            document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number
+        row.forEach(function(cell, idxJ){
+            // document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number
             
-            if(square.mine === true) {
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup") 
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
+            if(cell.mine === true) {
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
-            if(square.flag === true) {
+            if(cell.flag === true) {
                 console.log("flag true");
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup")
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing") 
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag") 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing"); 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag"); 
                 // document.getElementById(`r${idxI}c${idxJ}`).src = "./imgs/flag.png" 
             }
-            if(square.flag === false) {
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag")
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup") 
+            if(cell.flag === false) {
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup"); 
             }
-            if(square.number === null) {
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag")
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup")
+            if(cell.number === null) {
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 // document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty") 
-                
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty"); 
+            }
+            if(cell.visible) {
+                document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number;
+                document.getElementById(`r${idxI}c${idxJ}`).backgroundColor = "black";
             }
             
         })
@@ -205,13 +210,27 @@ function render() {
 }
 
 function setFloodZerosToNull(i, j) {
-
     if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
     if (board[i][j].number === 0) board[i][j].number = null;
+    
+    setSurroundingCellsToShowNums(i - 1, j - 1);
+    setSurroundingCellsToShowNums(i - 1, j);
+    setSurroundingCellsToShowNums(i - 1, j + 1);
+    setSurroundingCellsToShowNums(i, j - 1);
+    setSurroundingCellsToShowNums(i, j + 1);
+    setSurroundingCellsToShowNums(i + 1, j - 1);
+    setSurroundingCellsToShowNums(i + 1, j);
+    setSurroundingCellsToShowNums(i + 1, j + 1);
     
     setFloodZerosToNull(i - 1, j);
     setFloodZerosToNull(i, j - 1);
     setFloodZerosToNull(i, j + 1);
     setFloodZerosToNull(i + 1, j);
+    
+}
+
+function setSurroundingCellsToShowNums (i, j) {
+    if (i < 0 || j < 0 || i === 10 || j === 10) return;
+    board[i][j].visible = true;
 
 }
