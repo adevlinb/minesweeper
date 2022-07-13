@@ -24,6 +24,7 @@ let loseScoreEl = document.getElementById("games-lost");
 let boardEl = document.getElementById("board");
 let bombNumEl = document.getElementById("bombs-found");
 let flagNumEl = document.getElementById("flags-placed");
+let messageEl = document.getElementById("messages");
 
 
 
@@ -76,7 +77,7 @@ function init() {
     })
 
     setBoard();
-    setScores();
+    setScoresAndMessages();
     render();
 }
 
@@ -110,17 +111,21 @@ function getRandomIdx() {
 }
 
 function setNumsAroundBombs(idxI, idxJ) {
-
-    // guard to stay in bounds
     if (idxI < 0 || idxI > 9 || idxJ < 0 || idxJ > 9 || board[idxI][idxJ].mine === true) return;
     board[idxI][idxJ].number = board[idxI][idxJ].number + 1;
 }
 
-function setScores() {
+function setScoresAndMessages() {
     winScoreEl.textContent = `Wins: ${gamesWon}`;
     loseScoreEl.textContent = `Loses ${gamesLost}`;
     bombNumEl.textContent = `Bombs: ${bombsToFind}`;
     flagNumEl.textContent = `Flags: ${flagsPlaced}`;
+    if (gameStatus === null) {
+        messageEl.textContent = "Let's Play!";
+    } else if (gameStatus === "W") {
+        messageEl.textContent = "You Win!";
+        
+    }
 }
 
 function handleGuesses(evt) {
@@ -151,21 +156,22 @@ function handleGuesses(evt) {
             board[i][j].visible = true;
         }
     }
-    console.log(board, "im here")
-    setScores();
     gameStatus = checkGameStatus(i, j);
+    setScoresAndMessages();
     render()
 }
 
 function checkGameStatus(i, j) {
     if (board[i][j].number === -1 && setFlag !== true) {
+        ++gamesLost
         return "L"
     } 
+
     //check if all bombs have flags &&...
     for (let array in bombLookup) {
         let i = bombLookup[array][0];
         let j = bombLookup[array][1];
-        
+        console.log("here", board[i][j]);
     
     }
     
@@ -173,35 +179,31 @@ function checkGameStatus(i, j) {
 }
 
 function render() {
-
+    
     board.forEach(function(row, idxI) {
         row.forEach(function(cell, idxJ){
-            // document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number
             
-            if(cell.mine === true) {
+            if (cell.mine) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
-            if(cell.flag === true) {
+            if (cell.flag) {
                 console.log("flag true");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing"); 
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag"); 
-                // document.getElementById(`r${idxI}c${idxJ}`).src = "./imgs/flag.png" 
             }
-            if(cell.flag === false) {
+            if (cell.flag === false) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup"); 
             }
-            if(cell.number === null) {
+            if (cell.number === null) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
-                // document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing") 
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty"); 
             }
-            if(cell.visible) {
+            if (cell.visible) {
                 document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number;
-                document.getElementById(`r${idxI}c${idxJ}`).backgroundColor = "black";
             }
             
         })
