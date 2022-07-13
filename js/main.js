@@ -132,7 +132,7 @@ function handleGuesses(evt) {
     let i = parseInt(evt.target.id[1]);
     let j = parseInt(evt.target.id[3]);
     //guards
-    if (gameStatus === "L" ||
+    if (gameStatus !== null ||
        (board[i][j].flag === true && setFlag !== true) ||
        board[i][j].number === null) return;
 
@@ -156,6 +156,7 @@ function handleGuesses(evt) {
             board[i][j].visible = true;
         }
     }
+    console.log(board)
     gameStatus = checkGameStatus(i, j);
     setScoresAndMessages();
     render()
@@ -163,18 +164,21 @@ function handleGuesses(evt) {
 
 function checkGameStatus(i, j) {
     if (board[i][j].number === -1 && setFlag !== true) {
-        ++gamesLost
+        ++gamesLost;
         return "L"
     } 
 
     //check if all bombs have flags &&...
-    for (let array in bombLookup) {
-        let i = bombLookup[array][0];
-        let j = bombLookup[array][1];
-        console.log("here", board[i][j]);
-    
+    let bombs = Object.entries(bombLookup)
+    console.log(bombs, "bombs")
+    let every = bombs.every(function(bomb) {
+        console.log(board[bomb[1][0]][bomb[1][1]], "board")
+        return board[bomb[1][0]][bomb[1][1]].flag === true ? true : false
+    })
+    if(every) {
+        ++gamesWon;
+        return "W";
     }
-    
     return null;
 }
 
@@ -188,7 +192,6 @@ function render() {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
             if (cell.flag) {
-                console.log("flag true");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing"); 
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag"); 
