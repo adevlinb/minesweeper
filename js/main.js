@@ -6,7 +6,7 @@
 let gameStatus; //null to start "w" for all bombs / no more moves "L" for clicked on mine
 let setFlag; // flag setting selected to drop a flag on selected spot
 let setClick; // regular cursor selected for regular click functions
-let board; 
+let board;
 let numOfMines;
 let currentPosition;
 let bombLookup;
@@ -31,18 +31,20 @@ let messageEl = document.getElementById("messages");
 
 
 /*----- event listeners -----*/
-document.getElementById("set-flag")
-    .addEventListener("click", function(evt) {
+document.getElementById("set-flag").addEventListener("click", function(evt) {
         setFlag = true;
-        setClick = false; 
+        setClick = false;
     });
-document.getElementById("set-click")
-    .addEventListener("click", function(evt) {
+document.getElementById("set-click").addEventListener("click", function(evt) {
         setFlag = false;
-        setClick = true; 
+        setClick = true;
     });
 
 boardEl.addEventListener("click", handleGuesses)
+document.getElementById("play-again").addEventListener("click", function() {
+    init();
+
+})
 
 
 /*----- functions -----*/
@@ -86,23 +88,21 @@ function setBoard() {
     while (count < numOfMines) {
         let rndIdxI = getRandomIdx();
         let rndIdxJ = getRandomIdx();
-    
-        if (board[rndIdxI][rndIdxJ].mine === true) {
-            rndIdxI = getRandomIdx();
-            rndIdxJ = getRandomIdx();
+
+        if (!board[rndIdxI][rndIdxJ].mine) {
+            board[rndIdxI][rndIdxJ].mine = true;
+            board[rndIdxI][rndIdxJ].number = -1;
+            setNumsAroundBombs(rndIdxI - 1, rndIdxJ - 1);
+            setNumsAroundBombs(rndIdxI - 1, rndIdxJ);
+            setNumsAroundBombs(rndIdxI - 1, rndIdxJ + 1);
+            setNumsAroundBombs(rndIdxI, rndIdxJ - 1);
+            setNumsAroundBombs(rndIdxI, rndIdxJ + 1);
+            setNumsAroundBombs(rndIdxI + 1, rndIdxJ - 1);
+            setNumsAroundBombs(rndIdxI + 1, rndIdxJ);
+            setNumsAroundBombs(rndIdxI + 1, rndIdxJ + 1);
+            bombLookup[count] = [rndIdxI, rndIdxJ];
+            count ++;
         };
-        board[rndIdxI][rndIdxJ].mine = true;
-        board[rndIdxI][rndIdxJ].number = -1;
-        setNumsAroundBombs(rndIdxI - 1, rndIdxJ - 1);
-        setNumsAroundBombs(rndIdxI - 1, rndIdxJ);
-        setNumsAroundBombs(rndIdxI - 1, rndIdxJ + 1);
-        setNumsAroundBombs(rndIdxI, rndIdxJ - 1);
-        setNumsAroundBombs(rndIdxI, rndIdxJ + 1);
-        setNumsAroundBombs(rndIdxI + 1, rndIdxJ - 1);
-        setNumsAroundBombs(rndIdxI + 1, rndIdxJ);
-        setNumsAroundBombs(rndIdxI + 1, rndIdxJ + 1);
-        bombLookup[count] = [rndIdxI, rndIdxJ];
-        count ++;
     }
 }
 
@@ -124,7 +124,7 @@ function setScoresAndMessages() {
         messageEl.textContent = "Let's Play!";
     } else if (gameStatus === "W") {
         messageEl.textContent = "You Win!";
-        
+
     }
 }
 
@@ -133,11 +133,11 @@ function handleGuesses(evt) {
     let j = parseInt(evt.target.id[3]);
     //guards
     if (gameStatus !== null ||
-       (board[i][j].flag === true && setFlag !== true) ||
-       board[i][j].number === null) return;
+       board[i][j].flag === true && setFlag !== true ||
+       board[i][j].number === null)
+       return;
 
     if (setFlag) {
-        // setFlag = true... if this position has a flag -> remove it; if it doesn't -> add it
         if(board[i][j].flag === true) {
             board[i][j].flag = false
             --flagsPlaced;
@@ -148,7 +148,7 @@ function handleGuesses(evt) {
             --bombsToFind;
         }
     }
-    
+
     if (setClick) {
         if (board[i][j].number === 0) {
             setFloodZerosToNull(i, j)
@@ -156,7 +156,7 @@ function handleGuesses(evt) {
             board[i][j].visible = true;
         }
     }
-    console.log(board)
+
     gameStatus = checkGameStatus(i, j);
     setScoresAndMessages();
     render()
@@ -166,16 +166,17 @@ function checkGameStatus(i, j) {
     if (board[i][j].number === -1 && setFlag !== true) {
         ++gamesLost;
         return "L"
-    } 
+    }
 
     //check if all bombs have flags &&...
     let bombs = Object.entries(bombLookup)
-    console.log(bombs, "bombs")
     let every = bombs.every(function(bomb) {
-        console.log(board[bomb[1][0]][bomb[1][1]], "board")
         return board[bomb[1][0]][bomb[1][1]].flag === true ? true : false
     })
-    if(every) {
+    let allCells = allRevealed();
+    console.log(every)
+    if(every && allCells) {
+        console.log(allCells)
         ++gamesWon;
         return "W";
     }
@@ -183,32 +184,32 @@ function checkGameStatus(i, j) {
 }
 
 function render() {
-    
+
     board.forEach(function(row, idxI) {
         row.forEach(function(cell, idxJ){
-            
+            if (cell)
             if (cell.mine) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
             if (cell.flag) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
-                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing"); 
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag"); 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("flag");
             }
             if (cell.flag === false) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup"); 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup");
             }
             if (cell.number === null) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("flag");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
-                document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty"); 
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("empty");
             }
-            if (cell.visible) {
-                document.getElementById(`r${idxI}c${idxJ}`).textContent = board[idxI][idxJ].number;
+            if (cell.visible && cell.number > 0) {
+                document.getElementById(`r${idxI}c${idxJ}`).textContent = cell.number;
             }
-            
+
         })
     })
 
@@ -217,7 +218,7 @@ function render() {
 function setFloodZerosToNull(i, j) {
     if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
     if (board[i][j].number === 0) board[i][j].number = null;
-    
+
     setSurroundingCellsToShowNums(i - 1, j - 1);
     setSurroundingCellsToShowNums(i - 1, j);
     setSurroundingCellsToShowNums(i - 1, j + 1);
@@ -226,16 +227,28 @@ function setFloodZerosToNull(i, j) {
     setSurroundingCellsToShowNums(i + 1, j - 1);
     setSurroundingCellsToShowNums(i + 1, j);
     setSurroundingCellsToShowNums(i + 1, j + 1);
-    
+
     setFloodZerosToNull(i - 1, j);
     setFloodZerosToNull(i, j - 1);
     setFloodZerosToNull(i, j + 1);
     setFloodZerosToNull(i + 1, j);
-    
+
 }
 
 function setSurroundingCellsToShowNums (i, j) {
     if (i < 0 || j < 0 || i === 10 || j === 10) return;
     board[i][j].visible = true;
 
+}
+
+function allRevealed() {
+    let all = true;
+    board.forEach(function(rowArr) {
+        rowArr.forEach(function(cell) {
+            if (!cell.mine) {
+                if (!cell.visible) all = false;
+            }
+        })
+    });
+    return all;
 }
