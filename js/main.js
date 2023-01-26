@@ -31,6 +31,7 @@ let messageEl = document.getElementById("messages");
 
 
 /*----- event listeners -----*/
+boardEl.addEventListener("click", handleGuesses)
 document.getElementById("set-flag").addEventListener("click", function(evt) {
         setFlag = true;
         setClick = false;
@@ -40,10 +41,9 @@ document.getElementById("set-click").addEventListener("click", function(evt) {
         setClick = true;
     });
 
-boardEl.addEventListener("click", handleGuesses)
 document.getElementById("play-again").addEventListener("click", function() {
     init();
-
+    resetDOM();
 })
 
 
@@ -79,15 +79,14 @@ function init() {
     })
 
     setBoard();
-    setScoresAndMessages();
     render();
 }
 
 function setBoard() {
     let count = 0;
     while (count < numOfMines) {
-        let rndIdxI = getRandomIdx();
-        let rndIdxJ = getRandomIdx();
+        let rndIdxI = Math.floor(Math.random() * 10);
+        let rndIdxJ = Math.floor(Math.random() * 10);
 
         if (!board[rndIdxI][rndIdxJ].mine) {
             board[rndIdxI][rndIdxJ].mine = true;
@@ -106,10 +105,6 @@ function setBoard() {
     }
 }
 
-function getRandomIdx() {
-    return Math.floor(Math.random() * 10);
-}
-
 function setNumsAroundBombs(idxI, idxJ) {
     if (idxI < 0 || idxI > 9 || idxJ < 0 || idxJ > 9 || board[idxI][idxJ].mine === true) return;
     board[idxI][idxJ].number = board[idxI][idxJ].number + 1;
@@ -120,12 +115,10 @@ function setScoresAndMessages() {
     loseScoreEl.textContent = `Loses ${gamesLost}`;
     bombNumEl.textContent = `Bombs: ${bombsToFind}`;
     flagNumEl.textContent = `Flags: ${flagsPlaced}`;
-    if (gameStatus === null) {
-        messageEl.textContent = "Let's Play!";
-    } else if (gameStatus === "W") {
-        messageEl.textContent = "You Win!";
+    if (gameStatus === null) messageEl.textContent = "Let's Play!";
+    if (gameStatus === "W") messageEl.textContent = "You Win!";
+    if (gameStatus === "L") messageEl.textContent = "You Lost!";
 
-    }
 }
 
 function handleGuesses(evt) {
@@ -158,7 +151,6 @@ function handleGuesses(evt) {
     }
 
     gameStatus = checkGameStatus(i, j);
-    setScoresAndMessages();
     render()
 }
 
@@ -173,10 +165,10 @@ function checkGameStatus(i, j) {
     let every = bombs.every(function(bomb) {
         return board[bomb[1][0]][bomb[1][1]].flag === true ? true : false
     })
+
     let allCells = allRevealed();
-    console.log(every)
+
     if(every && allCells) {
-        console.log(allCells)
         ++gamesWon;
         return "W";
     }
@@ -184,11 +176,49 @@ function checkGameStatus(i, j) {
 }
 
 function render() {
+    renderBoard()
+    setScoresAndMessages();
+}
 
+function setFloodZerosToNull(i, j) {
+    if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0 || board[i][j].bomb) return;
+    if (board[i][j].number === 0) board[i][j].number = null;
+
+    setSurroundingCellsToShowNums(i - 1, j - 1);
+    setSurroundingCellsToShowNums(i - 1, j);
+    setSurroundingCellsToShowNums(i - 1, j + 1);
+    setSurroundingCellsToShowNums(i, j - 1);
+    setSurroundingCellsToShowNums(i, j + 1);
+    setSurroundingCellsToShowNums(i + 1, j - 1);
+    setSurroundingCellsToShowNums(i + 1, j);
+    setSurroundingCellsToShowNums(i + 1, j + 1);
+    setFloodZerosToNull(i - 1, j);
+    setFloodZerosToNull(i, j - 1);
+    setFloodZerosToNull(i, j + 1);
+    setFloodZerosToNull(i + 1, j);
+}
+
+function setSurroundingCellsToShowNums (i, j) {
+    if (i < 0 || j < 0 || i === 10 || j === 10) return;
+    board[i][j].visible = true;
+}
+
+function allRevealed() {
+    let all = true;
+    board.forEach(function(rowArr) {
+        rowArr.forEach(function(cell) {
+            if (!cell.mine) {
+                if (!cell.visible) all = false;
+            }
+        });
+    });
+    return all;
+}
+
+function renderBoard() {
     board.forEach(function(row, idxI) {
         row.forEach(function(cell, idxJ){
-            if (cell)
-            if (cell.mine) {
+            if (cell.mine && cell.visible) {
                 document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
                 document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
@@ -209,46 +239,18 @@ function render() {
             if (cell.visible && cell.number > 0) {
                 document.getElementById(`r${idxI}c${idxJ}`).textContent = cell.number;
             }
+        })
+    })
+}
+
+function resetDOM() {
+    board.forEach(function(row, idxI) {
+        row.forEach(function(cell, idxJ){
+            document.getElementById(`r${idxI}c${idxJ}`).classList.add("null-setup");
+            document.getElementById(`r${idxI}c${idxJ}`).classList.remove("testing");
+            document.getElementById(`r${idxI}c${idxJ}`).classList.remove("empty");
+            document.getElementById(`r${idxI}c${idxJ}`).innerHTML = ""
 
         })
     })
-
-}
-
-function setFloodZerosToNull(i, j) {
-    if (i < 0 || j < 0 || i === 10 || j === 10 || board[i][j].number !== 0) return;
-    if (board[i][j].number === 0) board[i][j].number = null;
-
-    setSurroundingCellsToShowNums(i - 1, j - 1);
-    setSurroundingCellsToShowNums(i - 1, j);
-    setSurroundingCellsToShowNums(i - 1, j + 1);
-    setSurroundingCellsToShowNums(i, j - 1);
-    setSurroundingCellsToShowNums(i, j + 1);
-    setSurroundingCellsToShowNums(i + 1, j - 1);
-    setSurroundingCellsToShowNums(i + 1, j);
-    setSurroundingCellsToShowNums(i + 1, j + 1);
-
-    setFloodZerosToNull(i - 1, j);
-    setFloodZerosToNull(i, j - 1);
-    setFloodZerosToNull(i, j + 1);
-    setFloodZerosToNull(i + 1, j);
-
-}
-
-function setSurroundingCellsToShowNums (i, j) {
-    if (i < 0 || j < 0 || i === 10 || j === 10) return;
-    board[i][j].visible = true;
-
-}
-
-function allRevealed() {
-    let all = true;
-    board.forEach(function(rowArr) {
-        rowArr.forEach(function(cell) {
-            if (!cell.mine) {
-                if (!cell.visible) all = false;
-            }
-        })
-    });
-    return all;
 }
