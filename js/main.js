@@ -125,13 +125,13 @@ function handleGuesses(evt) {
     let i = parseInt(evt.target.id[1]);
     let j = parseInt(evt.target.id[3]);
     //guards
-    if (gameStatus !== null ||
-       board[i][j].flag === true && setFlag !== true ||
-       board[i][j].number === null)
-       return;
+    if (gameStatus ||
+        board[i][j].flag && !setFlag ||
+        board[i][j].number === null)
+        return;
 
     if (setFlag) {
-        if(board[i][j].flag === true) {
+        if(board[i][j].flag) {
             board[i][j].flag = false
             --flagsPlaced;
             ++bombsToFind;
@@ -143,11 +143,8 @@ function handleGuesses(evt) {
     }
 
     if (setClick) {
-        if (board[i][j].number === 0) {
-            setFloodZerosToNull(i, j)
-        } else if (board[i][j] !== 0) {
-            board[i][j].visible = true;
-        }
+        if (board[i][j].number === 0) setFloodZerosToNull(i, j)
+        if (board[i][j] !== 0) board[i][j].visible = true;
     }
 
     gameStatus = checkGameStatus(i, j);
@@ -238,6 +235,10 @@ function renderBoard() {
             }
             if (cell.visible && cell.number > 0) {
                 document.getElementById(`r${idxI}c${idxJ}`).textContent = cell.number;
+            }
+            if (gameStatus === "L" && cell.mine) {
+                document.getElementById(`r${idxI}c${idxJ}`).classList.remove("null-setup");
+                document.getElementById(`r${idxI}c${idxJ}`).classList.add("testing");
             }
         })
     })
